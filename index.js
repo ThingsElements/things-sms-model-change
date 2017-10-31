@@ -23,11 +23,11 @@ var parser = parse({
     skip_empty_line: true,
     skip_lines_with_empty_values: true
 }, function (err, data) {
-
+    console.log(model.model.components.length)
     var modifiedComponents = modifyData(model.model.components)
     model.model.components = modifiedComponents
 
-    console.log(model.model)
+    // console.log(model.model.components)
     var regex = /(.+)(.json)$/
     var newFilename = regex.exec(filename)[1] + '-change.json';
     writeFile(newFilename, JSON.stringify(model.model, ' ', '  '));
@@ -113,13 +113,15 @@ function sortObject(object, desc) {
 function modifyData(components) {
 
   var arr = [];
-
   components.forEach(function(curComponent, index, components){
     if(curComponent.id && curComponent.id.indexOf('chute') != -1 &&
       curComponent.type == 'rect' && Math.floor(curComponent.width) == 63 &&
       curComponent.fillStyle == '#fcfcfc'){
+        // 슈트 수량 표시 박스 수정
+        curComponent.left = curComponent.left - 30.5
+
         var obj = {
-          "width": 70,
+          "width": 71,
           "height": 21,
           "fillStyle": "#fcfcfc",
           "strokeStyle": "#000",
@@ -139,9 +141,63 @@ function modifyData(components) {
           "paddingRight": 5
         }
         curComponent = Object.assign(curComponent, obj);
-      }
+        
+    } else if(curComponent.text == "합 계" || curComponent.fillStyle == "#010eaa"){
+        // 합계 박스 삭제 
+        return
+    } else if(curComponent.text == "상" && curComponent.fontSize == 19) {
+        // 합계이면서 텍스트 "상" 삭제
+        return
+    } else if(curComponent.text == "하" && curComponent.fontSize == 19) {
+        // 합계이면서 텍스트 "하" 삭제
+        return
+    } else if(curComponent.text == "상") {
+        // "상" 텍스트 삭제 후 삼각형으로 변환
+        var x = curComponent.left + 4
+        var y = curComponent.top + 6
+        curComponent = {
+            "type": "triangle",
+            "x1": x + 5.6248593979178,
+            "y1": y,
+            "x2": x,
+            "y2": y + 7.61928187477525,
+            "x3": x + 11.2497187958356,
+            "y3": y + 7.61928187477525,
+            "fillStyle": "#6599cd",
+            "strokeStyle": "#000",
+            "alpha": 1,
+            "hidden": false,
+            "lineWidth": 0,
+            "lineDash": "solid",
+            "lineCap": "butt",
+            "rotation": 0
+        }
+    } else if(curComponent.text == "하"){
+        // "하" 텍스트 삭제 후 삼각형으로 변환
+        var x = curComponent.left + 4
+        var y = curComponent.top + 7
+        curComponent = {
+            "type": "triangle",
+            "x1": x + 5.6248593979178,
+            "y1": y,
+            "x2": x,
+            "y2": y + 7.61928187477525,
+            "x3": x + 11.2497187958356,
+            "y3": y + 7.61928187477525,
+            "fillStyle": "#6599cd",
+            "strokeStyle": "#000",
+            "alpha": 1,
+            "hidden": false,
+            "lineWidth": 0,
+            "lineDash": "solid",
+            "lineCap": "butt",
+            "rotation": 3.141592653589793
+        }
+    } else if(curComponent.type == "line" && curComponent.fillStyle == "#fff"){
+        // 슈트 번호의 흰색 라인 삭제
+        return
+    }
       arr.push(curComponent);
   })
-
   return arr
 }
