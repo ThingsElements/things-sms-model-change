@@ -1,7 +1,11 @@
+const csv = require('csv');
+
 const fs = require('fs');
+const parse = require('csv-parse');
 
 const program = require('commander');
 const inquirer = require('inquirer');
+
 
 var model = require('./data');
 
@@ -23,6 +27,7 @@ var parser = parse({
     var modifiedComponents = modifyData(model.model.components)
     model.model.components = modifiedComponents
 
+    console.log(model.model)
     var regex = /(.+)(.json)$/
     var newFilename = regex.exec(filename)[1] + '-change.json';
     writeFile(newFilename, JSON.stringify(model.model, ' ', '  '));
@@ -46,7 +51,8 @@ function inquir(files) {
 
 
 function getListJSON() {
-    var regex = /\.(json)$/;
+    // 숫자로 끝나는 .json파일.  package등등 때문에 필터함.
+    var regex = /\d\.(json)$/;
     fs.readdir('./', (err, files) => {
         var csvFiles = files.filter(file => {
             return regex.test(file)
